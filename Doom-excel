@@ -1,0 +1,76 @@
+Option Explicit
+
+Dim Map(1 To 10, 1 To 20) As String
+Dim PlayerX As Integer, PlayerY As Integer
+
+Sub StartGame()
+    Application.ScreenUpdating = False
+    InitMap
+    PlayerX = 2
+    PlayerY = 2
+    Do
+        DrawMap
+        HandleInput
+    Loop
+End Sub
+
+Sub InitMap()
+    Dim i As Integer, j As Integer
+    For i = 1 To 10
+        For j = 1 To 20
+            If i = 1 Or i = 10 Or j = 1 Or j = 20 Then
+                Map(i, j) = "#"
+            Else
+                Map(i, j) = " "
+            End If
+        Next j
+    Next i
+    ' Ajouter un ennemi
+    Map(5, 15) = "M"
+End Sub
+
+Sub DrawMap()
+    Dim i As Integer, j As Integer, ligne As String
+    Cells.Clear
+    For i = 1 To 10
+        ligne = ""
+        For j = 1 To 20
+            If i = PlayerY And j = PlayerX Then
+                ligne = ligne & "P"
+            Else
+                ligne = ligne & Map(i, j)
+            End If
+        Next j
+        Cells(i, 1).Value = ligne
+    Next i
+End Sub
+
+Sub HandleInput()
+    Dim touche As String
+    touche = InputBox("Z: haut, S: bas, Q: gauche, D: droite, T: tirer", "DOOM Excel")
+    
+    Select Case LCase(touche)
+        Case "z"
+            If Map(PlayerY - 1, PlayerX) = " " Then PlayerY = PlayerY - 1
+        Case "s"
+            If Map(PlayerY + 1, PlayerX) = " " Then PlayerY = PlayerY + 1
+        Case "q"
+            If Map(PlayerY, PlayerX - 1) = " " Then PlayerX = PlayerX - 1
+        Case "d"
+            If Map(PlayerY, PlayerX + 1) = " " Then PlayerX = PlayerX + 1
+        Case "t"
+            FireShot
+    End Select
+End Sub
+
+Sub FireShot()
+    Dim x As Integer
+    For x = PlayerX + 1 To 20
+        If Map(PlayerY, x) = "#" Then Exit For
+        If Map(PlayerY, x) = "M" Then
+            Map(PlayerY, x) = "X"
+            MsgBox "Ennemi touché !"
+            Exit For
+        End If
+    Next x
+End Sub
