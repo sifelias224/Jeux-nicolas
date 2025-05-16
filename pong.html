@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>PONG Local VS</title>
+  <style>
+    canvas {
+      background: black;
+      display: block;
+      margin: 0 auto;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="pong" width="600" height="400"></canvas>
+  <script>
+    const canvas = document.getElementById("pong");
+    const ctx = canvas.getContext("2d");
+
+    const paddleWidth = 10, paddleHeight = 80;
+    const ballSize = 10;
+    let upArrowPressed = false;
+    let downArrowPressed = false;
+    let wPressed = false;
+    let sPressed = false;
+
+    const player1 = {
+      x: 10,
+      y: canvas.height / 2 - paddleHeight / 2,
+      width: paddleWidth,
+      height: paddleHeight,
+      color: "white",
+      dy: 5
+    };
+
+    const player2 = {
+      x: canvas.width - 20,
+      y: canvas.height / 2 - paddleHeight / 2,
+      width: paddleWidth,
+      height: paddleHeight,
+      color: "white",
+      dy: 5
+    };
+
+    const ball = {
+      x: canvas.width / 2,
+      y: canvas.height / 2,
+      width: ballSize,
+      height: ballSize,
+      color: "white",
+      dx: 4,
+      dy: 4
+    };
+
+    function drawRect(x, y, w, h, color) {
+      ctx.fillStyle = color;
+      ctx.fillRect(x, y, w, h);
+    }
+
+    function clearCanvas() {
+      drawRect(0, 0, canvas.width, canvas.height, "black");
+    }
+
+    function drawPaddle(p) {
+      drawRect(p.x, p.y, p.width, p.height, p.color);
+    }
+
+    function drawBall(b) {
+      drawRect(b.x, b.y, b.width, b.height, b.color);
+    }
+
+    function update() {
+      // Joueur 1
+      if (wPressed && player1.y > 0) player1.y -= player1.dy;
+      if (sPressed && player1.y < canvas.height - player1.height) player1.y += player1.dy;
+
+      // Joueur 2
+      if (upArrowPressed && player2.y > 0) player2.y -= player2.dy;
+      if (downArrowPressed && player2.y < canvas.height - player2.height) player2.y += player2.dy;
+
+      // Balle
+      ball.x += ball.dx;
+      ball.y += ball.dy;
+
+      // Rebond haut/bas
+      if (ball.y <= 0 || ball.y + ball.height >= canvas.height) ball.dy *= -1;
+
+      // Rebond sur paddles
+      if (
+        ball.x <= player1.x + player1.width &&
+        ball.y + ball.height >= player1.y &&
+        ball.y <= player1.y + player1.height
+      ) ball.dx *= -1;
+
+      if (
+        ball.x + ball.width >= player2.x &&
+        ball.y + ball.height >= player2.y &&
+        ball.y <= player2.y + player2.height
+      ) ball.dx *= -1;
+
+      // Reset si sortie
+      if (ball.x < 0 || ball.x > canvas.width) {
+        ball.x = canvas.width / 2;
+        ball.y = canvas.height / 2;
+        ball.dx *= -1;
+        ball.dy *= -1;
+      }
+    }
+
+    function draw() {
+      clearCanvas();
+      drawPaddle(player1);
+      drawPaddle(player2);
+      drawBall(ball);
+    }
+
+    function gameLoop() {
+      update();
+      draw();
+      requestAnimationFrame(gameLoop);
+    }
+
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "ArrowUp") upArrowPressed = true;
+      if (e.key === "ArrowDown") downArrowPressed = true;
+      if (e.key === "w" || e.key === "W") wPressed = true;
+      if (e.key === "s" || e.key === "S") sPressed = true;
+    });
+
+    document.addEventListener("keyup", function (e) {
+      if (e.key === "ArrowUp") upArrowPressed = false;
+      if (e.key === "ArrowDown") downArrowPressed = false;
+      if (e.key === "w" || e.key === "W") wPressed = false;
+      if (e.key === "s" || e.key === "S") sPressed = false;
+    });
+
+    gameLoop();
+  </script>
+</body>
+</html>
